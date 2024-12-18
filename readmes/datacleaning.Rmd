@@ -23,7 +23,7 @@ sop_data <- read.csv(sop_file, header = TRUE)
 # Extract and clean the correct field names (standardized to lowercase)
 ```{r}
 # Makesure the fields column data is all in lowercase 
-lower_fields <- tolower(trimws(sop_data[[1]]))  # Lowercase and remove extra spaces
+correct_fields <- tolower(trimws(sop_data[[1]]))  # Lowercase and remove extra spaces
 ```
 
 # Set the path to the folder containing all 140k files
