@@ -241,7 +241,26 @@ cat("Total number of invalid mouse life stages:", length(invalid_mouse_life_stag
 # The results show there are zero entries with invalid life stages. 
 ```
 
+#Looking for Duplicates
 
+```{r}
+combined_output <- read.csv("~/Desktop/DCDM_GROUP7/combined_output.csv")
+combined_output
+
+# Find duplicate rows
+duplicates <- duplicated(combined_output)
+
+# View duplicate rows
+duplicate_rows <- combined_output[duplicates, ]
+print(duplicate_rows)
+
+```
+
+```{r}
+# Replace 'column_name' with the name of the column (analysis id)
+duplicates_in_column <- combined_output[duplicated(combined_output$analysis_id), ]
+print(duplicates_in_column)
+```
 
 
 
