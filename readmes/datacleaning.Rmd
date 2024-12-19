@@ -8,40 +8,32 @@ date: "2024-12-18"
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-##Install tidyverse package
-The tidyverse package contains .....
+# Data cleaning and collating 
 ```{r}
+##Install tidyverse package
 library(tidyverse)
-```
 
 #Define the correct field order from the IMPC_SOP.csv file
-```{r}
 sop_file <- "~/Desktop/DCDM_Group7/originals/IMPC_SOP.csv" #path to IMPC_SOP
 sop_data <- read.csv(sop_file, header = TRUE) 
-```
 
 # Extract and clean the correct field names (standardized to lowercase)
-```{r}
-# Makesure the fields column data is all in lowercase 
 correct_fields <- tolower(trimws(sop_data[[1]]))  # Lowercase and remove extra spaces
-```
 
 # Set the path to the folder containing all 140k files
-```{r}
 data_path <- "~/Desktop/DCDM_Group7/originals/7/"
-```
 
 # List all files in the folder
-```{r}
 file_list <- list.files(path = data_path, pattern = "\\.csv$", full.names = TRUE)
-```
 
 # Creata an empty list to store data
-```{r}
 combined_data <- list()
+
 ```
 
+
 #Create a loop to process each file 
+
 ```{r}
 for (file in file_list) {
   # Read the file
@@ -72,10 +64,192 @@ for (file in file_list) {
 # Combine all data frames into one
 ```{r}
 final_combined_data <- bind_rows(combined_data)
-```
 
 # Write the combined data to a single CSV file
-```{r}
 write.csv(final_combined_data, "combined_output.csv", row.names = FALSE)
 ```
+
+
+# Validate string length ( 15 characters) in analysis id
+```{r}
+# Define the function 
+
+validate_analysis_id <- function (x, dataType, min_val, max_val) {
+  if (tolower(dataType) == "string") {
+    invalid_analysis_id <- which(sapply(x, nchar) < min_val | sapply (x, nchar) > max_val)
+    return(invalid_analysis_id)
+  } 
+}
+  
+# Call the function 
+  
+invalid_analysis_id <- validate_analysis_id(final_combined_data$analysis_id, "string", 15, 15)
+
+#Print results 
+print(invalid_analysis_id)
+
+# The returned results, is named_integer (0). This means that all strings are valid, and have the lengths defined in the SOP file. 
+```
+
+# Validate string length for gene accession id 
+```{r}
+# Define the function 
+validate_gene_accession_id <- function (x, dataType, min_val, max_val) {
+  if (tolower(dataType) == "string") {
+    invalid_gene_accession_id <- which(sapply(x, nchar) < min_val | sapply (x, nchar) > max_val)
+    return(invalid_gene_accession_id)
+  } 
+}
+  
+# Call the function 
+invalid_gene_accession_id <- validate_gene_accession_id(final_combined_data$gene_accession_id, "string", 9, 11)
+
+#Print results 
+print(invalid_gene_accession_id)
+
+# The returned results, is named_integer (0). This means that all strings are valid, and have the lengths defined in the SOP file.
+
+```
+
+# Validate string length for gene_symbol 
+```{r}
+# Define the function 
+validate_gene_symbol <- function (x, dataType, min_val, max_val) {
+  if (tolower(dataType) == "string") {
+    invalid_gene_symbol <- which(sapply(x, nchar) < min_val | sapply (x, nchar) > max_val)
+    return(invalid_gene_symbol)
+  } 
+}
+  
+# Call the function 
+invalid_gene_symbol <- validate_gene_symbol(final_combined_data$gene_symbol, "string", 1, 13)
+
+#Print results 
+print(invalid_gene_symbol)
+
+# The returned results, is named_integer (0). This means that all strings are valid, and have the lengths defined in the SOP file.
+```
+
+# Validate string length for parameter_id 
+```{r}
+# Define the function 
+validate_parameter_id <- function (x, dataType, min_val, max_val) {
+  if (tolower(dataType) == "string") {
+    invalid_parameter_id <- which(sapply(x, nchar) < min_val | sapply (x, nchar) > max_val)
+    return(invalid_parameter_id)
+  } 
+}
+  
+# Call the function 
+invalid_parameter_id <- validate_parameter_id (final_combined_data$parameter_id, "string", 15, 18)
+
+#Print results 
+print(invalid_parameter_id)
+
+# The returned results, is named_integer (0). This means that all strings are valid, and have the lengths defined in the SOP file.
+```
+
+# Validate parameter_name 
+```{r}
+# Define the function 
+validate_parameter_name <- function (x, dataType, min_val, max_val) {
+  if (tolower(dataType) == "string") {
+    invalid_parameter_name <- which(sapply(x, nchar) < min_val | sapply (x, nchar) > max_val)
+    return(invalid_parameter_name)
+  } 
+}
+  
+# Call the function 
+invalid_parameter_name <- validate_parameter_name(final_combined_data$parameter_name, "string", 2, 74)
+
+#Print results 
+print(invalid_parameter_name)
+
+# The returned results, is named_integer (0). This means that all strings are valid, and have the lengths defined in the SOP file.
+```
+
+
+# Validate p-value (float) 
+```{r}
+# Define the function 
+validate_p_value <- function (x, min_val, max_val) {
+  x <- as.numeric(x)
+  invalid_p_value <- which(as.numeric(x) < min_val |
+                             as.numeric(x) > max_val)
+  return(invalid_p_value)
+}
+  
+# Call the function 
+invalid_p_value <- validate_p_value(final_combined_data$pvalue, 0, 1)
+
+#Print results 
+#print(invalid_p_value) #this will print the number of rows 
+
+#Print the total number of invalud p-values 
+cat("Total number of invalid p-values:", length(invalid_p_value))
+
+# The total entries of invalid p-values is 813. This means that 813 rows are greater than or lower than 0 or 1.  
+```
+
+# Validate mouse strain 
+
+```{r}
+# Define the function 
+validate_mouse_strain <- function (x, field_name) {
+  if (field_name == "mouse_strain") {
+    valid_mouse_strains <- c("C57BL", "B6J", "C3H", "129SV")
+    invalid_mouse_strain <- which(!(x %in% valid_mouse_strains))
+    return(invalid_mouse_strain)
+  }
+}
+
+# Call the function 
+invalid_mouse_strain <- validate_mouse_strain(final_combined_data$mouse_strain, "mouse_strain")
+
+#Print the invalid rows 
+print(invalid_mouse_strain)
+
+# Print the total number of invalid mouse strains
+cat("Total number of invalid mouse strain:", length(invalid_mouse_strain))
+
+# The results show there are 1146 invalid mouse strain entries. There are 1146 strains that do not match the required stages in the SOP file. 
+
+```
+
+# Validate the mouse life stage 
+
+```{r}
+# Define the function 
+validate_mouse_life_stage <- function (x, field_name) {
+  if (field_name == "mouse_life_stage") {
+    valid_mouse_life_stage <- c("E12.5", "E15.5", "E18.5", "E9.5", 
+      "Early adult", "Late adult", "Middle aged adult")
+    invalid_mouse_life_stage <- which(!(x %in% valid_mouse_life_stage))
+    return(invalid_mouse_life_stage)
+  }
+}
+
+# Call the function 
+invalid_mouse_life_stage <- validate_mouse_life_stage(final_combined_data$mouse_life_stage, "mouse_life_stage")
+
+#Print the invalid rows 
+print(invalid_mouse_life_stage)
+
+# Print the total number of invalid mouse strains
+cat("Total number of invalid mouse life stages:", length(invalid_mouse_life_stage))
+
+# The results show there are zero entries with invalid life stages. 
+```
+
+
+
+
+
+
+
+
+
+
+
+
 
