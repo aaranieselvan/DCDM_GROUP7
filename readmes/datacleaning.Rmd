@@ -168,56 +168,7 @@ print(invalid_parameter_name)
 # The returned results, is named_integer (0). This means that all strings are valid, and have the lengths defined in the SOP file.
 ```
 
-
-# Validate p-value (float) 
-```{r}
-# Define the function 
-validate_p_value <- function (x, min_val, max_val) {
-  x <- as.numeric(x)
-  invalid_p_value <- which(as.numeric(x) < min_val |
-                             as.numeric(x) > max_val)
-  return(invalid_p_value)
-}
-  
-# Call the function 
-invalid_p_value <- validate_p_value(final_combined_data$pvalue, 0, 1)
-
-#Print results 
-#print(invalid_p_value) #this will print the number of rows 
-
-#Print the total number of invalud p-values 
-cat("Total number of invalid p-values:", length(invalid_p_value))
-
-# The total entries of invalid p-values is 813. This means that 813 rows are greater than or lower than 0 or 1.  
-```
-
-# Validate mouse strain 
-
-```{r}
-# Define the function 
-validate_mouse_strain <- function (x, field_name) {
-  if (field_name == "mouse_strain") {
-    valid_mouse_strains <- c("C57BL", "B6J", "C3H", "129SV")
-    invalid_mouse_strain <- which(!(x %in% valid_mouse_strains))
-    return(invalid_mouse_strain)
-  }
-}
-
-# Call the function 
-invalid_mouse_strain <- validate_mouse_strain(final_combined_data$mouse_strain, "mouse_strain")
-
-#Print the invalid rows 
-print(invalid_mouse_strain)
-
-# Print the total number of invalid mouse strains
-cat("Total number of invalid mouse strain:", length(invalid_mouse_strain))
-
-# The results show there are 1146 invalid mouse strain entries. There are 1146 strains that do not match the required stages in the SOP file. 
-
-```
-
 # Validate the mouse life stage 
-
 ```{r}
 # Define the function 
 validate_mouse_life_stage <- function (x, field_name) {
@@ -241,6 +192,73 @@ cat("Total number of invalid mouse life stages:", length(invalid_mouse_life_stag
 # The results show there are zero entries with invalid life stages. 
 ```
 
+
+# Validate p-value (float) 
+```{r}
+# Define the function 
+validate_p_value <- function (x, min_val, max_val) {
+  x <- as.numeric(x)
+  invalid_p_value <- which(as.numeric(x) < min_val |
+                             as.numeric(x) > max_val)
+  return(invalid_p_value)
+}
+  
+# Call the function 
+invalid_p_value <- validate_p_value(final_combined_data$pvalue, 0, 1)
+
+#Print results 
+#print(invalid_p_value) #this will print the number of rows 
+
+#Print the total number of invalud p-values 
+cat("Total number of invalid p-values:", length(invalid_p_value))
+
+# The total entries of invalid p-values is 813. This means that 813 rows are greater than or lower than 0 or 1.
+
+#Final combined data with the removed invalid entries 
+cleaned_mouse_data <- final_combined_data[-invalid_p_value, ]
+
+#Prints the final number of rows remaining after removing invalid cases : 142066
+cat("Number of rows after removing invalid mouse strains:", nrow(cleaned_mouse_data))
+
+#Save the output file 
+write.csv(cleaned_mouse_data, "cleaned_mouse_data.csv", row.names = FALSE)
+
+
+
+```
+
+# Validate mouse strain 
+
+```{r}
+# Define the function 
+validate_mouse_strain <- function (x, field_name) {
+  if (field_name == "mouse_strain") {
+    valid_mouse_strains <- c("C57BL", "B6J", "C3H", "129SV")
+    invalid_mouse_strain <- which(!(x %in% valid_mouse_strains))
+    return(invalid_mouse_strain)
+  }
+}
+
+# Call the function 
+invalid_mouse_strain <- validate_mouse_strain(cleaned_mouse_data$mouse_strain, "mouse_strain")
+
+#Print the invalid rows 
+print(invalid_mouse_strain)
+
+# Print the total number of invalid mouse strains
+cat("Total number of invalid mouse strain:", length(invalid_mouse_strain))
+
+# The results show there are 1135 invalid mouse strain entries. There are 1135 strains that do not match the required stages in the SOP file. 
+
+#Final combined data with the removed invalid entries 
+clean_final_data <- cleaned_mouse_data[-invalid_mouse_strain, ]
+
+#Prints the final number of rows remaining after removing invalid cases : 140931
+cat("Number of rows after removing invalid mouse strains:", nrow(clean_final_data))
+
+write.csv(clean_final_data, "clean_final_data.csv", row.names = FALSE)
+```
+
 #Looking for Duplicates
 
 ```{r}
@@ -261,6 +279,7 @@ print(duplicate_rows)
 duplicates_in_column <- combined_output[duplicated(combined_output$analysis_id), ]
 print(duplicates_in_column)
 ```
+
 
 
 
