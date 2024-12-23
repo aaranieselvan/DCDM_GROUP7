@@ -8,7 +8,7 @@ date: "2024-12-18"
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# Data cleaning and collating 
+#Data cleaning and collating 
 ```{r}
 ##Install tidyverse package
 library(tidyverse)
@@ -32,7 +32,7 @@ combined_data <- list()
 ```
 
 
-#Create a loop to process each file 
+##Create a loop to process each file 
 
 ```{r}
 for (file in file_list) {
@@ -61,7 +61,7 @@ for (file in file_list) {
 }
 ```
 
-# Combine all data frames into one
+##Combine all data frames into one
 ```{r}
 final_combined_data <- bind_rows(combined_data)
 
@@ -70,7 +70,7 @@ write.csv(final_combined_data, "combined_output.csv", row.names = FALSE)
 ```
 
 
-# Validate string length ( 15 characters) in analysis id
+##Validate string length ( 15 characters) in analysis id
 ```{r}
 # Define the function 
 
@@ -91,7 +91,7 @@ print(invalid_analysis_id)
 # The returned results, is named_integer (0). This means that all strings are valid, and have the lengths defined in the SOP file. 
 ```
 
-# Validate string length for gene accession id 
+##Validate string length for gene accession id 
 ```{r}
 # Define the function 
 validate_gene_accession_id <- function (x, dataType, min_val, max_val) {
@@ -111,7 +111,7 @@ print(invalid_gene_accession_id)
 
 ```
 
-# Validate string length for gene_symbol 
+##Validate string length for gene_symbol 
 ```{r}
 # Define the function 
 validate_gene_symbol <- function (x, dataType, min_val, max_val) {
@@ -130,7 +130,7 @@ print(invalid_gene_symbol)
 # The returned results, is named_integer (0). This means that all strings are valid, and have the lengths defined in the SOP file.
 ```
 
-# Validate string length for parameter_id 
+##Validate string length for parameter_id 
 ```{r}
 # Define the function 
 validate_parameter_id <- function (x, dataType, min_val, max_val) {
@@ -149,7 +149,7 @@ print(invalid_parameter_id)
 # The returned results, is named_integer (0). This means that all strings are valid, and have the lengths defined in the SOP file.
 ```
 
-# Validate parameter_name 
+##Validate parameter_name 
 ```{r}
 # Define the function 
 validate_parameter_name <- function (x, dataType, min_val, max_val) {
@@ -168,7 +168,7 @@ print(invalid_parameter_name)
 # The returned results, is named_integer (0). This means that all strings are valid, and have the lengths defined in the SOP file.
 ```
 
-# Validate the mouse life stage 
+##Validate the mouse life stage 
 ```{r}
 # Define the function 
 validate_mouse_life_stage <- function (x, field_name) {
@@ -193,7 +193,7 @@ cat("Total number of invalid mouse life stages:", length(invalid_mouse_life_stag
 ```
 
 
-# Validate p-value (float) 
+##Validate p-value (float) 
 ```{r}
 # Define the function 
 validate_p_value <- function (x, min_val, max_val) {
@@ -227,7 +227,7 @@ write.csv(cleaned_mouse_data, "cleaned_mouse_data.csv", row.names = FALSE)
 
 ```
 
-# Validate mouse strain 
+##Validate mouse strain 
 
 ```{r}
 # Define the function 
@@ -259,7 +259,7 @@ cat("Number of rows after removing invalid mouse strains:", nrow(clean_final_dat
 write.csv(clean_final_data, "clean_final_data.csv", row.names = FALSE)
 ```
 
-#Looking for Duplicates
+##Looking for Duplicates
 
 ```{r}
 combined_output <- read.csv("~/Desktop/DCDM_GROUP7/combined_output.csv")
@@ -282,7 +282,7 @@ print(duplicates_in_column)
 
 #Cleaning Disease information file
 
-#Remove the header in bash
+##Remove the header in bash
 ```{bash}
 sed '1D' Disease_information.txt > Disease_information_no_header.txt #remove header containing x
 
@@ -291,7 +291,7 @@ sed 's/"[0-9]*" "//g' Disease_information_no_header.txt > Disease_information_cl
 sed 's/"//g' Disease_information_clean.txt > Disease_information_edit.txt #remove unnecessary quotations 
 ```
 
-#Looping to assign correct columns
+##Looping to assign correct columns
 ```{r}
 # Function to process each line
 process_line <- function(line) {
@@ -326,48 +326,205 @@ process_line <- function(line) {
 lines <- readLines("C:/Users/srila/Desktop/DCDM_GROUP7/Disease_information_edit.txt")
 
 # Apply the function to each line and store results in a data frame
-processed_data <- t(sapply(lines, process_line))
+clean_disease <- t(sapply(lines, process_line))
 
 # Convert the result to a data frame
-processed_data <- as.data.frame(processed_data)
+clean_disease <- as.data.frame(clean_disease)
 
 # View the processed data
-head(processed_data)
-view(processed_data)
+View(clean_disease)
 ```
 
-#Convert to tibble for easy visualisation
+##Convert to tibble for easy visualisation
 ```{r}
-processed_data_correct_row_names = as_tibble(processed_data, rownames = "disease_id")
-View(processed_data_correct_row_names)
+clean_disease_correct_row_names = as_tibble(clean_disease, rownames = "disease_id")
+View(clean_disease_correct_row_names)
 
 #remove first column
-processed_data_correct_row_names2 = processed_data_correct_row_names[, -1]
-View(processed_data_correct_row_names2)
-
-# Check the number of columns in the dataframe
-num_columns <- ncol(processed_data_correct_row_names2)
-
-# Print the result
-print(num_columns)
+clean_disease_correct_row_names2 = clean_disease_correct_row_names[, -1]
+View(clean_disease_correct_row_names2)
 ```
 
-#rename the header with the correct column ids
+##Rename the header with the correct column ids
 ```{r}
 # Assuming 'processed_data' is the dataframe and the first row is the header
-colnames(processed_data_correct_row_names2) = processed_data[1, ]   # Set the first row as the column names
-new_processed_data = processed_data_correct_row_names2[-1, ]            # Remove the first row which is now the header
+colnames(clean_disease_correct_row_names2) = clean_disease[1, ]   # Set the first row as the column names
+clean_disease_info = clean_disease_correct_row_names2[-1, ]            # Remove the first row which is now the header
 
 # View the updated dataframe
-View(new_processed_data)
+View(clean_disease_info)
 ```
 
-#Convert to csv
+##Convert to csv
 ```{r}
-write.csv(new_processed_data, "Disease_info.csv", row.names = FALSE)
+write.csv(clean_disease_info, "clean_disease_info.csv", row.names = FALSE)
 ```
 
+#Cleaning Parameter Description File
+```{bash}
+sed 's/"[0-9]*" "//g' IMPC_parameter_description_no_header.txt > IMPC_parameter_description_clean.txt
 
+sed -i '1s/.*/impcParameterOrigId, name, description, parameterId/' IMPC_parameter_description_clean.txt  #rename column header
+
+sed 's/"//g' IMPC_parameter_description_clean.txt > IMPC_parameter_description_edit.txt #remove unnecessary quotations 
+```
+
+##Looping to assign correct columns
+```{r}
+#Function to process each line
+process_line2 <- function(line) {
+  # Split the line by commas
+  split_line <- strsplit(line, ",")[[1]]
+  
+  # Check if the line has enough parts (at least 3 columns)
+  if (length(split_line) >= 3) {
+    # First column: everything before the first comma
+    first_column <- split_line[1]
+    
+    # Last column: everything after the last comma
+    last_column <- split_line[length(split_line)]
+    
+    # Second-to-last column: everything between the second-to-last and last comma
+    second_last_column <- split_line[length(split_line)-1]
+    
+    # Remainder as the second column: everything else in between
+    second_column <- paste(split_line[2:(length(split_line)-2)], collapse = ",")
+    
+    # Return as a named vector
+    return(c(first_column = first_column, second_column = second_column, 
+             second_last_column = second_last_column, last_column = last_column))
+  } else {
+    # If the line doesn't have enough columns, return as is
+    return(c(first_column = split_line[1], second_column = "", 
+             second_last_column = "", last_column = ""))
+  }
+}
+
+# Read the file line by line
+lines <- readLines("C:/Users/srila/Desktop/DCDM_GROUP7/originals/IMPC_parameter_description_edit.txt")
+
+# Apply the function to each line and store results in a data frame
+clean_PD <- t(sapply(lines, process_line))
+
+# Convert the result to a data frame
+clean_PD <- as.data.frame(clean_PD)
+
+# View the processed data
+View(clean_PD)
+```
+
+##Convert to tibble for easy visualisation
+```{r}
+clean_PD_correct_row_names = as_tibble(clean_PD, rownames = "impcParameterOrigId")
+View(clean_PD_correct_row_names)
+
+#remove first column
+clean_PD_correct_row_names = clean_PD_correct_row_names[, -1]
+View(clean_PD_correct_row_names)
+```
+
+##Rename the header with the correct column ids
+```{r}
+# Assuming 'processed_data' is the dataframe and the first row is the header
+colnames(clean_PD_correct_row_names) = clean_PD_correct_row_names[1, ]   # Set the first row as the column names
+clean_parameter_description = clean_PD_correct_row_names[-1, ]            # Remove the first row which is now the header
+
+# View the updated dataframe
+View(clean_parameter_description)
+```
+
+##Replace missing values with NA
+```{r}
+clean_parameter_description[clean_parameter_description == "" ] <- "NA" #sets NA values
+clean_parameter_description[is.na(clean_parameter_description)] <- "NA" #sets NA values into string
+View(clean_parameter_description)
+
+write.csv(clean_parameter_description, "clean_parameter.csv", row.names = FALSE)
+```
+
+#Cleaning Procedure file
+```{bash}
+sed 's/"[0-9]*" "//g' IMPC_procedure.txt > IMPC_procedure_clean.txt
+
+sed -i '1s/.*/impcParameterOrigId, name, description, parameterId/' IMPC_procedure_clean.txt  #rename column header
+
+sed 's/"//g' IMPC_procedure_clean.txt > IMPC_procedure_edit.txt #remove unnecessary quotations 
+```
+
+##Looping to assign correct columns
+```{r}
+# Function to process each line
+process_line3 <- function(line) {
+  # Split the line by commas
+  split_line <- strsplit(line, ",")[[1]]
+  
+  # Check if the line has enough parts (at least 3 columns)
+  if (length(split_line) >= 3) {
+    # First column: everything before the first comma
+    first_column <- split_line[1]
+    
+    # Last column: everything after the last comma
+    last_column <- split_line[length(split_line)]
+    
+    # Second-to-last column: everything between the second-to-last and last comma
+    second_last_column <- split_line[length(split_line)-1]
+    
+    # Remainder as the second column: everything else in between
+    second_column <- paste(split_line[2:(length(split_line)-2)], collapse = ",")
+    
+    # Return as a named vector
+    return(c(first_column = first_column, second_column = second_column, 
+             second_last_column = second_last_column, last_column = last_column))
+  } else {
+    # If the line doesn't have enough columns, return as is
+    return(c(first_column = split_line[1], second_column = "", 
+             second_last_column = "", last_column = ""))
+  }
+}
+
+# Read the file line by line
+lines <- readLines("C:/Users/srila/Desktop/DCDM_GROUP7/originals/IMPC_procedure_edit.txt")
+
+# Apply the function to each line and store results in a data frame
+clean_Pro <- t(sapply(lines, process_line))
+
+# Convert the result to a data frame
+clean_Pro <- as.data.frame(clean_Pro)
+
+# View the processed data
+View(clean_Pro)
+```
+
+##Convert to tibble for easy visualisation
+```{r}
+clean_Pro_correct_row_names = as_tibble(clean_Pro, rownames = "name") #changes rowname to correct first column name
+View(clean_Pro_correct_row_names)
+
+#remove first column
+clean_Pro_correct_row_names = clean_Pro_correct_row_names[, -1]
+View(clean_Pro_correct_row_names)
+```
+
+##Rename the header with the correct column ids
+```{r}
+# Assuming 'processed_data' is the dataframe and the first row is the header
+colnames(clean_Pro_correct_row_names) = clean_Pro_correct_row_names[1, ]   # Set the first row as the column names
+clean_Pro = clean_Pro_correct_row_names[-1, ]            # Remove the first row which is now the header
+
+# View the updated dataframe
+View(clean_Pro)
+```
+
+##Replace NA values in a specific column with the string "NA"
+```{r}
+clean_Pro[clean_Pro == ' '] <- NA
+clean_Pro[is.na(clean_Pro)] <- "NA"
+
+# View the updated column
+View(clean_Pro)
+
+write.csv(clean_Pro, "clean_Pro.csv", row.names = FALSE)
+```
 
 
 
