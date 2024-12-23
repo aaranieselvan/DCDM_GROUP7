@@ -458,7 +458,7 @@ write.csv(clean_parameter_description, "IMPC_parameter_description_clean.csv", r
 ```{bash}
 sed 's/"[0-9]*" "//g' IMPC_procedure.txt > IMPC_procedure_numbers_removed.txt
 
-sed -i '1s/.*/impcParameterOrigId, name, description, parameterId/' IMPC_procedure_numbers_removed.txt  #rename column header, removed procedureID as column contained no values
+sed -i '1s/.*/name, description, isMandatory, impcParameterOrigId/' IMPC_procedure_numbers_removed.txt  #rename column header, removed procedureID as column contained no values
 
 sed 's/"//g' IMPC_procedure_numbers_removed.txt > IMPC_procedure_clean.txt #remove unnecessary quotations 
 ```
