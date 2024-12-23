@@ -280,6 +280,92 @@ duplicates_in_column <- combined_output[duplicated(combined_output$analysis_id),
 print(duplicates_in_column)
 ```
 
+#Cleaning Disease information file
+
+#Remove the header in bash
+```{bash}
+sed '1D' Disease_information.txt > Disease_information_no_header.txt #remove header containing x
+
+sed 's/"[0-9]*" "//g' Disease_information_no_header.txt > Disease_information_clean.txt #remove numbers in quotations
+
+sed 's/"//g' Disease_information_clean.txt > Disease_information_edit.txt #remove unnecessary quotations 
+```
+
+#Looping to assign correct columns
+```{r}
+# Function to process each line
+process_line <- function(line) {
+  # Split the line by commas
+  split_line <- strsplit(line, ",")[[1]]
+  
+  # Check if the line has enough parts (at least 3 columns)
+  if (length(split_line) >= 3) {
+    # First column: everything before the first comma
+    first_column <- split_line[1]
+    
+    # Last column: everything after the last comma
+    last_column <- split_line[length(split_line)]
+    
+    # Second-to-last column: everything between the second-to-last and last comma
+    second_last_column <- split_line[length(split_line)-1]
+    
+    # Remainder as the second column: everything else in between
+    second_column <- paste(split_line[2:(length(split_line)-2)], collapse = ",")
+    
+    # Return as a named vector
+    return(c(first_column = first_column, second_column = second_column, 
+             second_last_column = second_last_column, last_column = last_column))
+  } else {
+    # If the line doesn't have enough columns, return as is
+    return(c(first_column = split_line[1], second_column = "", 
+             second_last_column = "", last_column = ""))
+  }
+}
+
+# Read the file line by line
+lines <- readLines("C:/Users/srila/Desktop/DCDM_GROUP7/Disease_information_edit.txt")
+
+# Apply the function to each line and store results in a data frame
+processed_data <- t(sapply(lines, process_line))
+
+# Convert the result to a data frame
+processed_data <- as.data.frame(processed_data)
+
+# View the processed data
+head(processed_data)
+view(processed_data)
+```
+
+#Convert to tibble for easy visualisation
+```{r}
+processed_data_correct_row_names = as_tibble(processed_data, rownames = "disease_id")
+View(processed_data_correct_row_names)
+
+#remove first column
+processed_data_correct_row_names2 = processed_data_correct_row_names[, -1]
+View(processed_data_correct_row_names2)
+
+# Check the number of columns in the dataframe
+num_columns <- ncol(processed_data_correct_row_names2)
+
+# Print the result
+print(num_columns)
+```
+
+#rename the header with the correct column ids
+```{r}
+# Assuming 'processed_data' is the dataframe and the first row is the header
+colnames(processed_data_correct_row_names2) = processed_data[1, ]   # Set the first row as the column names
+new_processed_data = processed_data_correct_row_names2[-1, ]            # Remove the first row which is now the header
+
+# View the updated dataframe
+View(new_processed_data)
+```
+
+#Convert to csv
+```{r}
+write.csv(new_processed_data, "Disease_info.csv", row.names = FALSE)
+```
 
 
 
