@@ -282,13 +282,18 @@ print(duplicates_in_column)
 
 #Cleaning Disease information file
 
+```{r}
+#install.packages("tibble")
+library(tibble)
+```
+
 ##Remove the header in bash
 ```{bash}
 sed '1D' Disease_information.txt > Disease_information_no_header.txt #remove header containing x
 
-sed 's/"[0-9]*" "//g' Disease_information_no_header.txt > Disease_information_clean.txt #remove numbers in quotations
+sed 's/"[0-9]*" "//g' Disease_information_no_header.txt > Disease_information_numbers_removed.txt #remove numbers in quotations
 
-sed 's/"//g' Disease_information_clean.txt > Disease_information_edit.txt #remove unnecessary quotations 
+sed 's/"//g' Disease_information_numbers_removed.txt > Disease_information_clean.txt #remove unnecessary quotations 
 ```
 
 ##Looping to assign correct columns
@@ -323,7 +328,7 @@ process_line <- function(line) {
 }
 
 # Read the file line by line
-lines <- readLines("C:/Users/srila/Desktop/DCDM_GROUP7/Disease_information_edit.txt")
+lines <- readLines("~/Desktop/DCDM_GROUP7/outputs/Disease_information_clean.txt")
 
 # Apply the function to each line and store results in a data frame
 clean_disease <- t(sapply(lines, process_line))
@@ -353,20 +358,23 @@ clean_disease_info = clean_disease_correct_row_names2[-1, ]            # Remove 
 
 # View the updated dataframe
 View(clean_disease_info)
+sum(is.na(clean_disease_info)) #check for missing values
 ```
 
 ##Convert to csv
 ```{r}
-write.csv(clean_disease_info, "clean_disease_info.csv", row.names = FALSE)
+write.csv(clean_disease_info, "Disease_information_clean.csv", row.names = FALSE)
 ```
 
 #Cleaning Parameter Description File
 ```{bash}
-sed 's/"[0-9]*" "//g' IMPC_parameter_description_no_header.txt > IMPC_parameter_description_clean.txt
+sed '1D' IMPC_parameter_description.txt > IMPC_parameter_description_no_header.txt
 
-sed -i '1s/.*/impcParameterOrigId, name, description, parameterId/' IMPC_parameter_description_clean.txt  #rename column header
+sed 's/"[0-9]*" "//g' IMPC_parameter_description_no_header.txt > IMPC_parameter_description_numbers_removed.txt
 
-sed 's/"//g' IMPC_parameter_description_clean.txt > IMPC_parameter_description_edit.txt #remove unnecessary quotations 
+sed -i '1s/.*/impcParameterOrigId, name, description, parameterId/' IMPC_parameter_description_numbers_removed.txt  #rename column header
+
+sed 's/"//g' IMPC_parameter_description_numbers_removed.txt > IMPC_parameter_description_clean.txt #remove unnecessary quotations 
 ```
 
 ##Looping to assign correct columns
@@ -401,10 +409,10 @@ process_line2 <- function(line) {
 }
 
 # Read the file line by line
-lines <- readLines("C:/Users/srila/Desktop/DCDM_GROUP7/originals/IMPC_parameter_description_edit.txt")
+lines <- readLines("~/Desktop/DCDM_GROUP7/outputs/IMPC_parameter_description_clean.txt")
 
 # Apply the function to each line and store results in a data frame
-clean_PD <- t(sapply(lines, process_line))
+clean_PD <- t(sapply(lines, process_line2))
 
 # Convert the result to a data frame
 clean_PD <- as.data.frame(clean_PD)
@@ -431,24 +439,28 @@ clean_parameter_description = clean_PD_correct_row_names[-1, ]            # Remo
 
 # View the updated dataframe
 View(clean_parameter_description)
+sum(is.na(clean_parameter_description)) #check for missing values
 ```
 
 ##Replace missing values with NA
 ```{r}
-clean_parameter_description[clean_parameter_description == "" ] <- "NA" #sets NA values
+clean_parameter_description[clean_parameter_description == " " ] <- NA #sets NA values
 clean_parameter_description[is.na(clean_parameter_description)] <- "NA" #sets NA values into string
 View(clean_parameter_description)
+sum(is.na(clean_parameter_description)) #check for missing values
+```
 
-write.csv(clean_parameter_description, "clean_parameter.csv", row.names = FALSE)
+```{r}
+write.csv(clean_parameter_description, "IMPC_parameter_description_clean.csv", row.names = FALSE)
 ```
 
 #Cleaning Procedure file
 ```{bash}
-sed 's/"[0-9]*" "//g' IMPC_procedure.txt > IMPC_procedure_clean.txt
+sed 's/"[0-9]*" "//g' IMPC_procedure.txt > IMPC_procedure_numbers_removed.txt
 
-sed -i '1s/.*/impcParameterOrigId, name, description, parameterId/' IMPC_procedure_clean.txt  #rename column header
+sed -i '1s/.*/impcParameterOrigId, name, description, parameterId/' IMPC_procedure_numbers_removed.txt  #rename column header, removed procedureID as column contained no values
 
-sed 's/"//g' IMPC_procedure_clean.txt > IMPC_procedure_edit.txt #remove unnecessary quotations 
+sed 's/"//g' IMPC_procedure_numbers_removed.txt > IMPC_procedure_clean.txt #remove unnecessary quotations 
 ```
 
 ##Looping to assign correct columns
@@ -483,10 +495,10 @@ process_line3 <- function(line) {
 }
 
 # Read the file line by line
-lines <- readLines("C:/Users/srila/Desktop/DCDM_GROUP7/originals/IMPC_procedure_edit.txt")
+lines <- readLines("~/Desktop/DCDM_GROUP7/outputs/IMPC_procedure_clean.txt")
 
 # Apply the function to each line and store results in a data frame
-clean_Pro <- t(sapply(lines, process_line))
+clean_Pro <- t(sapply(lines, process_line3))
 
 # Convert the result to a data frame
 clean_Pro <- as.data.frame(clean_Pro)
@@ -513,6 +525,7 @@ clean_Pro = clean_Pro_correct_row_names[-1, ]            # Remove the first row 
 
 # View the updated dataframe
 View(clean_Pro)
+sum(is.na(clean_Pro)) #check for missing values
 ```
 
 ##Replace NA values in a specific column with the string "NA"
@@ -522,10 +535,12 @@ clean_Pro[is.na(clean_Pro)] <- "NA"
 
 # View the updated column
 View(clean_Pro)
-
-write.csv(clean_Pro, "clean_Pro.csv", row.names = FALSE)
+sum(is.na(clean_Pro)) #check for missing values
 ```
 
+```{r}
+write.csv(clean_Pro, "IMPC_procedure_clean.csv", row.names = FALSE)
+```
 
 
 
