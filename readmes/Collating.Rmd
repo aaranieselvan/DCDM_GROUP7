@@ -74,7 +74,6 @@ cat("Total number of missing fields:", total_missing_fields, "\n")
 
 
 ###Combine all data frames into one - COLLATION
-
 ```{r}
 # Combine individual CSV files into one dataframe
 final_combined_data <- bind_rows(combined_data)
@@ -82,3 +81,5 @@ final_combined_data <- bind_rows(combined_data)
 # Write the combined data to a single CSV file
 write.csv(final_combined_data, "~/Desktop/DCDM_Group7/outputs/final_combined_output.csv", row.names = FALSE)
 #The output is not clean, but it is in the correct column order as the SOP file
+```
+
